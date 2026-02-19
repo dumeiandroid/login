@@ -195,7 +195,7 @@
 
   <script>
     // ─── KONFIGURASI ──────────────────────────────────────────
-    const API_URL      = 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis7'; // ← ganti
+    const API_URL      = 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis7';
     const API_SECRET   = 'admin';                            // ← ganti
     const REDIRECT_URL = '/user/dashboard.html';             // ← ganti
     // ──────────────────────────────────────────────────────────
@@ -238,11 +238,17 @@
           msgEl.className = 'msg success';
           msgEl.textContent = `Berhasil masuk! Selamat datang, ${username} 👋`;
 
-          // Kembali ke halaman asal, kalau tidak ada pakai REDIRECT_URL default
-          const redirectBack = localStorage.getItem('auth_redirect_back') || REDIRECT_URL;
+          // Kembali ke halaman asal, kalau tidak ada pakai history.back()
+          const redirectBack = localStorage.getItem('auth_redirect_back');
           localStorage.removeItem('auth_redirect_back');
 
-          setTimeout(() => { window.location.href = redirectBack; }, 1000);
+          setTimeout(() => {
+            if (redirectBack) {
+              window.location.href = redirectBack;
+            } else {
+              history.back(); // kembali ke halaman sebelumnya
+            }
+          }, 1000);
         } else {
           msgEl.className = 'msg error';
           msgEl.textContent = data.message || 'Username atau password salah.';
