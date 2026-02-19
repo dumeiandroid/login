@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Masuk — Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #5b9bd5;
+      --accent2: #7ec8e3;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1a202c;
+      --muted: #94a3b8;
+      --shadow: 0 4px 24px rgba(91,155,213,0.10);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    /* Soft blob background */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #b8d4f0, transparent);
+      top: -100px; right: -80px;
+    }
+    body::after {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, #c7eaf3, transparent);
+      bottom: -80px; left: -60px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .brand-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 14px;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .brand-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .brand-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.2rem 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .field {
+      margin-bottom: 1.2rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 0.5rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.78rem 1rem;
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(91,155,213,0.12);
+      background: #fff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.88rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      margin-top: 0.4rem;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 4px 14px rgba(91,155,213,0.3);
+    }
+
+    .btn:hover   { opacity: 0.92; }
+    .btn:active  { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+    .msg {
+      margin-top: 1rem;
+      padding: 0.7rem 1rem;
+      border-radius: 9px;
+      font-size: 0.83rem;
+      display: none;
+    }
+    .msg.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; display: block; }
+    .msg.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; display: block; }
+
+    .divider {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 1.5rem 0 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand-icon">👤</div>
+      <div class="brand-title">Selamat Datang</div>
+      <div class="brand-sub">Masuk ke akun kamu</div>
+    </div>
+
+    <div class="card">
+      <form id="userForm" onsubmit="handleLogin(event)">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Masukkan username" required autocomplete="username"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Masukkan password" required autocomplete="current-password"/>
+        </div>
+        <button type="submit" class="btn" id="loginBtn">Masuk</button>
+        <div class="msg" id="msg"></div>
+      </form>
+    </div>
+
+    <div class="divider">Butuh bantuan? Hubungi administrator.</div>
+  </div>
+
+  <script>
+    // ─── KONFIGURASI ──────────────────────────────────────────
+    const API_URL      = 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis7'; // ← ganti
+    const API_SECRET   = 'admin';                            // ← ganti
+    const REDIRECT_URL = '/user/dashboard.html';             // ← ganti
+    // ──────────────────────────────────────────────────────────
+
+    // Jika sudah login sebagai user, langsung redirect
+    if (localStorage.getItem('auth_role') === 'user' && localStorage.getItem('auth_token')) {
+      window.location.href = REDIRECT_URL;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('loginBtn');
+      const msgEl    = document.getElementById('msg');
+
+      msgEl.className = 'msg';
+      msgEl.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+
+      try {
+        const res = await fetch(`${API_URL}?action=login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type' : 'application/json',
+            'X-Custom-Auth': API_SECRET,
+            'X-Role'       : 'user'           // ← selalu user
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem('auth_token', API_SECRET);
+          localStorage.setItem('auth_role',  'user');
+          localStorage.setItem('auth_user',  JSON.stringify(data.data));
+
+          msgEl.className = 'msg success';
+          msgEl.textContent = `Berhasil masuk! Selamat datang, ${username} 👋`;
+
+          // Kembali ke halaman asal, kalau tidak ada pakai REDIRECT_URL default
+          const redirectBack = localStorage.getItem('auth_redirect_back') || REDIRECT_URL;
+          localStorage.removeItem('auth_redirect_back');
+
+          setTimeout(() => { window.location.href = redirectBack; }, 1000);
+        } else {
+          msgEl.className = 'msg error';
+          msgEl.textContent = data.message || 'Username atau password salah.';
+        }
+
+      } catch (err) {
+        msgEl.className = 'msg error';
+        msgEl.textContent = 'Tidak dapat terhubung ke server.';
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+    }
+  </script>
+
+</body>
+</html>

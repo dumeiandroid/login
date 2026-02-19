@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Keluar...</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f5f7fa;
+      color: #94a3b8;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <span>Sedang keluar, mohon tunggu...</span>
+  <script>
+    // ─── KONFIGURASI ──────────────────────────────
+    const LOGIN_PAGE = '/login_user.html'; // ← selalu ke login user
+    // ─────────────────────────────────────────────
+
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_role');
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('auth_redirect_back');
+    localStorage.removeItem('auth_redirect_msg');
+
+    setTimeout(() => { window.location.href = LOGIN_PAGE; }, 600);
+  </script>
+</body>
+</html>
