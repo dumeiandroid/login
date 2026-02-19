@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Access</title>
+  <title>Admin Access — v1.1</title>
   <!-- Sembunyikan judul tab agar tidak mencurigakan -->
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet"/>
   <style>
@@ -152,7 +152,7 @@
 
   <div class="wrap">
     <div class="top-label">Restricted Access</div>
-    <div class="card-title">Administrator</div>
+    <div class="card-title">Administrator V1</div>
     <div class="card-desc">// Halaman ini tidak dipublikasikan</div>
 
     <div class="card">
@@ -176,13 +176,20 @@
   <script>
     // ─── KONFIGURASI ──────────────────────────────────────────
     const API_URL       = 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis7';
-    const API_SECRET    = 'admin';                            // ← ganti
-    const REDIRECT_URL  = '/admin/dashboard.html';            // ← ganti
+    const API_SECRET    = 'admin';
+    const VERSION       = 'login_admin.html v1.1';
+    console.log('%c ' + VERSION + ' — loaded ✓', 'background:#c8a96e;color:#000;padding:3px 8px;border-radius:4px;font-weight:bold;');
     // ──────────────────────────────────────────────────────────
 
-    // Jika sudah login sebagai admin, langsung redirect
+    // Jika sudah login sebagai admin, langsung redirect ke halaman asal
     if (localStorage.getItem('auth_role') === 'admin' && localStorage.getItem('auth_token')) {
-      window.location.href = REDIRECT_URL;
+      const redirectBack = localStorage.getItem('auth_redirect_back');
+      localStorage.removeItem('auth_redirect_back');
+      if (redirectBack) {
+        window.location.href = redirectBack;
+      } else {
+        history.back();
+      }
     }
 
     async function handleLogin(e) {
