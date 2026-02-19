@@ -44,7 +44,14 @@ function redirectToLogin(message = null) {
 }
 
 function logout() {
-  window.location.href = 'https://login.lidan.co.id/logout_admin.html';
+  // Bersihkan localStorage di domain halaman ini dulu
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_role');
+  localStorage.removeItem('auth_user');
+  localStorage.removeItem('auth_redirect_back');
+  localStorage.removeItem('auth_redirect_msg');
+  // Baru redirect ke halaman login
+  window.location.href = AUTH_CONFIG.LOGIN_PAGE;
 }
 
 function getAuthUser() {
