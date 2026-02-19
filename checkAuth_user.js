@@ -3,6 +3,8 @@
 // <script src="https://login.lidan.co.id/checkAuth_user.js"></script>
 // <script> checkAuth(); </script>
 
+console.log('%c checkAuth_user.js v1.0 — loaded ✓', 'background:#5b9bd5;color:#fff;padding:3px 8px;border-radius:4px;font-weight:bold;');
+
 // ─── KONFIGURASI ─────────────────────────────────────
 const AUTH_CONFIG = {
   API_URL    : 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis7',
