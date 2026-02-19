@@ -152,7 +152,7 @@
 
   <div class="wrap">
     <div class="top-label">Restricted Access</div>
-    <div class="card-title">Administrator V1</div>
+    <div class="card-title">Administrator</div>
     <div class="card-desc">// Halaman ini tidak dipublikasikan</div>
 
     <div class="card">
@@ -177,19 +177,17 @@
     // ─── KONFIGURASI ──────────────────────────────────────────
     const API_URL       = 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis7';
     const API_SECRET    = 'admin';
-    const VERSION       = 'login_admin.html v1.1';
+    const VERSION       = 'login_admin.html v1.2';
     console.log('%c ' + VERSION + ' — loaded ✓', 'background:#c8a96e;color:#000;padding:3px 8px;border-radius:4px;font-weight:bold;');
     // ──────────────────────────────────────────────────────────
 
-    // Jika sudah login sebagai admin, langsung redirect ke halaman asal
+    // Ambil return URL dari parameter ?return=
+    const urlParams  = new URLSearchParams(window.location.search);
+    const returnUrl  = urlParams.get('return') || null;
+
+    // Jika sudah login sebagai admin, langsung redirect
     if (localStorage.getItem('auth_role') === 'admin' && localStorage.getItem('auth_token')) {
-      const redirectBack = localStorage.getItem('auth_redirect_back');
-      localStorage.removeItem('auth_redirect_back');
-      if (redirectBack) {
-        window.location.href = redirectBack;
-      } else {
-        history.back();
-      }
+      window.location.href = returnUrl || 'https://login.lidan.co.id';
     }
 
     async function handleLogin(e) {
@@ -225,16 +223,9 @@
           msgEl.className = 'msg success';
           msgEl.textContent = 'Access granted. Redirecting...';
 
-          // Kembali ke halaman asal, kalau tidak ada pakai history.back()
-          const redirectBack = localStorage.getItem('auth_redirect_back');
-          localStorage.removeItem('auth_redirect_back');
-
+          // Redirect ke halaman asal via URL parameter ?return=
           setTimeout(() => {
-            if (redirectBack) {
-              window.location.href = redirectBack;
-            } else {
-              history.back(); // kembali ke halaman sebelumnya
-            }
+            window.location.href = returnUrl || 'https://login.lidan.co.id';
           }, 900);
         } else {
           msgEl.className = 'msg error';

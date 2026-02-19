@@ -36,11 +36,14 @@ async function checkAuth() {
 
 function redirectToLogin(message = null) {
   if (message) localStorage.setItem('auth_redirect_msg', message);
-  localStorage.setItem('auth_redirect_back', window.location.href);
+  // Kirim URL asal sebagai parameter di URL login, bukan localStorage
+  // karena localStorage berbeda antar domain
+  const returnUrl = encodeURIComponent(window.location.href);
   localStorage.removeItem('auth_token');
   localStorage.removeItem('auth_role');
   localStorage.removeItem('auth_user');
-  window.location.href = AUTH_CONFIG.LOGIN_PAGE;
+  localStorage.removeItem('auth_redirect_back');
+  window.location.href = AUTH_CONFIG.LOGIN_PAGE + '?return=' + returnUrl;
 }
 
 function logout() {

@@ -171,7 +171,7 @@
   <div class="wrap">
     <div class="brand">
       <div class="brand-icon">👤</div>
-      <div class="brand-title">Selamat Datang V1</div>
+      <div class="brand-title">Selamat Datang</div>
       <div class="brand-sub">Masuk ke akun kamu</div>
     </div>
 
@@ -197,19 +197,17 @@
     // ─── KONFIGURASI ──────────────────────────────────────────
     const API_URL      = 'https://lidan-co-id.pages.dev/api/contacts_filter_dinamis7';
     const API_SECRET   = 'admin';
-    const VERSION      = 'login_user.html v1.1';
+    const VERSION      = 'login_user.html v1.2';
     console.log('%c ' + VERSION + ' — loaded ✓', 'background:#5b9bd5;color:#fff;padding:3px 8px;border-radius:4px;font-weight:bold;');
     // ──────────────────────────────────────────────────────────
 
-    // Jika sudah login sebagai user, langsung redirect ke halaman asal
+    // Ambil return URL dari parameter ?return=
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('return') || null;
+
+    // Jika sudah login sebagai user, langsung redirect
     if (localStorage.getItem('auth_role') === 'user' && localStorage.getItem('auth_token')) {
-      const redirectBack = localStorage.getItem('auth_redirect_back');
-      localStorage.removeItem('auth_redirect_back');
-      if (redirectBack) {
-        window.location.href = redirectBack;
-      } else {
-        history.back();
-      }
+      window.location.href = returnUrl || 'https://login.lidan.co.id';
     }
 
     async function handleLogin(e) {
@@ -230,7 +228,7 @@
           headers: {
             'Content-Type' : 'application/json',
             'X-Custom-Auth': API_SECRET,
-            'X-Role'       : 'user'           // ← selalu user
+            'X-Role'       : 'user'
           },
           body: JSON.stringify({ username, password })
         });
@@ -245,16 +243,9 @@
           msgEl.className = 'msg success';
           msgEl.textContent = `Berhasil masuk! Selamat datang, ${username} 👋`;
 
-          // Kembali ke halaman asal, kalau tidak ada pakai history.back()
-          const redirectBack = localStorage.getItem('auth_redirect_back');
-          localStorage.removeItem('auth_redirect_back');
-
+          // Redirect ke halaman asal via URL parameter ?return=
           setTimeout(() => {
-            if (redirectBack) {
-              window.location.href = redirectBack;
-            } else {
-              history.back(); // kembali ke halaman sebelumnya
-            }
+            window.location.href = returnUrl || 'https://login.lidan.co.id';
           }, 1000);
         } else {
           msgEl.className = 'msg error';
