@@ -1,12 +1,12 @@
 /**
  * admin_checkauth.js v2.1.0
  * Sisipkan di halaman manapun: <script src="https://login.lidan.co.id/admin_checkauth.js"></script>
- *ok
+ *
  * Konfigurasi bisa di-override sebelum tag script:
  *   window.CHECKAUTH_CONFIG = { loginUrl: '...', sessionHours: 8 }
  */
 (function () {
-  const VERSION = '2.1.0';
+  const VERSION = '2.1.1';
   console.log('%c[admin_checkauth.js] v' + VERSION, 'color:#e94560;font-weight:bold;font-size:13px');
 
   const CONFIG = Object.assign({
@@ -84,11 +84,12 @@
   // admin_checkauth.js membaca token ini, simpan ke localStorage lokal,
   // lalu hapus hash dari URL agar tidak terlihat.
   function extractTokenFromHash() {
-    const hash = window.location.hash; // misal: #auth=eyJ1c2VybmFtZSI6...
+    const hash = window.location.hash;
     if (!hash.startsWith('#auth=')) return null;
     try {
       const b64 = decodeURIComponent(hash.slice(6));
-      const session = JSON.parse(atob(b64));
+      // Decode base64 dengan aman untuk karakter Unicode
+      const session = JSON.parse(decodeURIComponent(escape(atob(b64))));
       return session;
     } catch (e) {
       console.warn('[admin_checkauth.js] Token hash tidak valid:', e);

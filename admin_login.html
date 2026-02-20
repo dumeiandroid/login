@@ -504,7 +504,7 @@
   const SESSION_KEY = 'admin_auth_session';
   const SESSION_HOURS = 8;
   const SECRET = 'admin';
-  const VERSION = '2.1.0';
+  const VERSION = '2.1.1';
   console.log('%c[admin_login.html] v' + VERSION, 'color:#e94560;font-weight:bold;font-size:13px');
 
   let currentRole = 'admin';
@@ -543,8 +543,8 @@
       return;
     }
 
-    // Konversi titik ke |
-    destP = val.replace(/\./g, '|');
+    // Konversi titik ke | dan slash ke ~
+    destP = val.replace(/\./g, '|').replace(/\//g, '~');
     updateDestDisplay(destP);
 
     // Update URL tanpa reload
@@ -640,9 +640,8 @@
           expiry: Date.now() + SESSION_HOURS * 60 * 60 * 1000,
         };
 
-        // Encode session ke base64 untuk dikirim via URL hash
-        // Sehingga admin_checkauth.js di domain tujuan bisa simpan ke localStorage-nya sendiri
-        const token = btoa(JSON.stringify(session));
+        // Encode session ke base64 (aman untuk karakter Unicode)
+        const token = btoa(unescape(encodeURIComponent(JSON.stringify(session))));
 
         showAlert('Login berhasil! Mengalihkan...', 'success');
 
