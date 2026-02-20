@@ -1,7 +1,7 @@
 /**
  * admin_checkauth.js v2.1.0
  * Sisipkan di halaman manapun: <script src="https://login.lidan.co.id/admin_checkauth.js"></script>
- *
+ *ok
  * Konfigurasi bisa di-override sebelum tag script:
  *   window.CHECKAUTH_CONFIG = { loginUrl: '...', sessionHours: 8 }
  */
