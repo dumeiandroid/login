@@ -6,6 +6,9 @@
  *   window.CHECKAUTH_CONFIG = { loginUrl: '...', sessionHours: 8 }
  */
 (function () {
+  const VERSION = '2.0.0';
+  console.log('%c[admin_checkauth.js] v' + VERSION, 'color:#e94560;font-weight:bold;font-size:13px');
+
   const CONFIG = Object.assign({
     loginUrl: 'https://login.lidan.co.id/admin_login.html',
     sessionHours: 8,
