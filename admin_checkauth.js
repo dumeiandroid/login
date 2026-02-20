@@ -14,23 +14,37 @@
   }, window.CHECKAUTH_CONFIG || {});
 
   // --- Helpers ---
+  // Konversi URL → p:
+  //   titik  (.) → pipa  (|)
+  //   slash  (/) → tilde (~)
+  //   hilangkan https:// atau http://
+  // Contoh: http://localhost/aplikasi/login/coba.html
+  //       → localhost~aplikasi~login~coba|html
   function urlToP(url) {
-    // Ambil hostname dari url, ganti titik dengan |
     try {
-      const host = new URL(url).host; // misal: app.lidan.co.id
-      return host.replace(/\./g, '|');
+      const parsed = new URL(url);
+      // host + pathname (tanpa trailing slash)
+      const raw = parsed.host + parsed.pathname.replace(/\/$/, '');
+      return raw.replace(/\./g, '|').replace(/\//g, '~');
     } catch {
-      return url.replace(/\./g, '|');
+      return url.replace(/^https?:\/\//, '').replace(/\./g, '|').replace(/\//g, '~');
     }
   }
 
+  // Konversi p → URL:
+  //   pipa  (|) → titik (.)
+  //   tilde (~) → slash (/)
   function pToUrl(p) {
-    return 'https://' + p.replace(/\|/g, '.');
+    const path = p.replace(/\|/g, '.').replace(/~/g, '/');
+    // Deteksi apakah localhost atau IP (tidak pakai https)
+    const isLocal = /^localhost/.test(path) || /^127\./.test(path) || /^192\./.test(path);
+    return (isLocal ? 'http://' : 'https://') + path;
   }
 
   function getCurrentP() {
-    return urlToP(window.location.href.split('?')[0].split('#')[0]);
-    // Ambil full URL tanpa query/hash, konversi ke p
+    // Ambil full URL tanpa query string dan hash
+    const clean = window.location.href.split('?')[0].split('#')[0];
+    return urlToP(clean);
   }
 
   function getSession() {

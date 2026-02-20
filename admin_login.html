@@ -521,9 +521,14 @@
     }
   }
 
+  function pToUrl(p) {
+    const path = p.replace(/\|/g, '.').replace(/~/g, '/');
+    const isLocal = /^localhost/.test(path) || /^127\./.test(path) || /^192\./.test(path);
+    return (isLocal ? 'http://' : 'https://') + path;
+  }
+
   function updateDestDisplay(p) {
-    const domain = p.replace(/\|/g, '.');
-    document.getElementById('destDisplay').textContent = domain;
+    document.getElementById('destDisplay').textContent = pToUrl(p);
   }
 
   function submitPopup() {
@@ -636,8 +641,8 @@
 
         showAlert('Login berhasil! Mengalihkan...', 'success');
 
-        // Redirect ke tujuan: ganti | dengan .
-        const targetUrl = 'https://' + destP.replace(/\|/g, '.');
+        // Redirect ke tujuan: konversi p kembali ke URL
+        const targetUrl = pToUrl(destP);
         setTimeout(() => {
           window.location.href = targetUrl;
         }, 800);
