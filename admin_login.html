@@ -504,38 +504,32 @@
   const SESSION_KEY = 'admin_auth_session';
   const SESSION_HOURS = 8;
   const SECRET = 'admin';
-  const VERSION = '2.1.1';
+  const VERSION = '3.0.0';
   console.log('%c[admin_login.html] v' + VERSION, 'color:#e94560;font-weight:bold;font-size:13px');
 
   let currentRole = 'admin';
-  let destP = ''; // nilai ?p= dari URL
+  let destP = '';
 
-  // --- Init ---
-  function init() {
-    const params = new URLSearchParams(window.location.search);
-    destP = params.get('p') || '';
-
-    if (!destP) {
-      // Tampilkan popup minta tujuan
-      document.getElementById('overlay').style.display = 'flex';
-    } else {
-      updateDestDisplay(destP);
-    }
-  }
-
+  // ─── URL Helpers ───────────────────────────────────────────────
   function pToUrl(p) {
     const path = p.replace(/\|/g, '.').replace(/~/g, '/');
-    const isLocal = /^localhost/.test(path) || /^127\./.test(path) || /^192\./.test(path);
+    const host = path.split('/')[0];
+    const isLocal = /^localhost(:\d+)?$/.test(host)
+                 || /^127\./.test(host)
+                 || /^192\.168\./.test(host)
+                 || /^10\./.test(host);
     return (isLocal ? 'http://' : 'https://') + path;
   }
 
   function updateDestDisplay(p) {
-    document.getElementById('destDisplay').textContent = pToUrl(p);
+    document.getElementById('destDisplay').textContent = p ? pToUrl(p) : '—';
   }
 
+  // ─── Popup: input tujuan manual ────────────────────────────────
   function submitPopup() {
     const val = document.getElementById('popupDest').value.trim();
     const errEl = document.getElementById('popupErr');
+    errEl.style.display = 'none';
 
     if (!val || val.length < 3) {
       errEl.style.display = 'block';
@@ -543,31 +537,44 @@
       return;
     }
 
-    // Konversi titik ke | dan slash ke ~
-    destP = val.replace(/\./g, '|').replace(/\//g, '~');
+    // Hapus protokol jika user iseng ketik https://
+    const clean = val.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    // Konversi . → | dan / → ~
+    destP = clean.replace(/\./g, '|').replace(/\//g, '~');
     updateDestDisplay(destP);
 
-    // Update URL tanpa reload
     const url = new URL(window.location.href);
     url.searchParams.set('p', destP);
     window.history.replaceState({}, '', url.toString());
 
     document.getElementById('overlay').style.display = 'none';
-    errEl.style.display = 'none';
   }
 
-  // Enter di popup
   document.addEventListener('keydown', (e) => {
     const overlay = document.getElementById('overlay');
     if (overlay.style.display !== 'none' && e.key === 'Enter') submitPopup();
   });
 
+  // ─── Init ──────────────────────────────────────────────────────
+  function init() {
+    const params = new URLSearchParams(window.location.search);
+    destP = params.get('p') || '';
+
+    if (!destP) {
+      document.getElementById('overlay').style.display = 'flex';
+    } else {
+      updateDestDisplay(destP);
+    }
+  }
+
+  // ─── Role ──────────────────────────────────────────────────────
   function setRole(role) {
     currentRole = role;
     document.getElementById('roleAdmin').classList.toggle('active', role === 'admin');
     document.getElementById('roleUser').classList.toggle('active', role === 'user');
   }
 
+  // ─── UI Helpers ────────────────────────────────────────────────
   function showAlert(msg, type) {
     const el = document.getElementById('alertMsg');
     el.className = 'alert ' + type;
@@ -591,6 +598,24 @@
     }
   }
 
+  // ─── Encode session ke base64 unicode-safe ─────────────────────
+  function encodeSession(session) {
+    try {
+      // Simpan hanya field penting — hindari token terlalu panjang
+      const slim = {
+        username: session.username,
+        role: session.role,
+        expiry: session.expiry,
+      };
+      const jsonStr = JSON.stringify(slim);
+      return btoa(unescape(encodeURIComponent(jsonStr)));
+    } catch (e) {
+      console.error('[login] Gagal encode session:', e);
+      return null;
+    }
+  }
+
+  // ─── Login ─────────────────────────────────────────────────────
   async function doLogin() {
     hideAlert();
     const username = document.getElementById('username').value.trim();
@@ -616,45 +641,60 @@
         'X-Role': currentRole,
       };
 
-      // Localhost atau domain tidak terdaftar → pakai secret key
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      if (useSecret || isLocalhost) {
+      // Pakai secret key untuk localhost atau jika dicentang manual
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1'
+                   || hostname.startsWith('192.168.') || hostname.startsWith('10.');
+      if (useSecret || isLocal) {
         headers['X-Custom-Auth'] = SECRET;
       }
 
-      const res = await fetch(`${API}?action=login`, {
+      const res = await fetch(API + '?action=login', {
         method: 'POST',
         headers,
-        credentials: 'include',
+        // TIDAK pakai credentials:include agar tidak trigger CORS preflight masalah
         body: JSON.stringify({ username, password }),
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showAlert(err.message || 'Server error: ' + res.status, 'error');
+        return;
+      }
 
       const data = await res.json();
 
       if (data.success) {
-        // Buat session object
+        // Buat session — simpan hanya data minimal agar token tidak terlalu panjang
         const session = {
           username,
           role: currentRole,
-          data: data.data,
           expiry: Date.now() + SESSION_HOURS * 60 * 60 * 1000,
         };
 
-        // Encode session ke base64 (aman untuk karakter Unicode)
-        const token = btoa(unescape(encodeURIComponent(JSON.stringify(session))));
+        const token = encodeSession(session);
+        if (!token) {
+          showAlert('Gagal membuat token session.', 'error');
+          return;
+        }
 
-        showAlert('Login berhasil! Mengalihkan...', 'success');
+        showAlert('✓ Login berhasil! Mengalihkan...', 'success');
 
-        // Redirect ke tujuan dengan token di hash: #auth=TOKEN
+        // Redirect ke halaman tujuan dengan token di hash
         const targetUrl = pToUrl(destP) + '#auth=' + encodeURIComponent(token);
+        console.log('[login] Redirect ke:', targetUrl);
+
         setTimeout(() => {
           window.location.href = targetUrl;
-        }, 800);
+        }, 700);
+
       } else {
         showAlert(data.message || 'Username atau password salah.', 'error');
       }
+
     } catch (err) {
-      showAlert('Gagal terhubung ke server: ' + err.message, 'error');
+      console.error('[login] Fetch error:', err);
+      showAlert('Gagal terhubung ke server. Periksa koneksi internet.', 'error');
     } finally {
       setLoading(false);
     }
